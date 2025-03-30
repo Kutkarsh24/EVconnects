@@ -33,32 +33,6 @@ EVconnects is a modern web application designed to facilitate electric vehicle c
 - Stripe account for payment processing
 - EmailJS account for email notifications
 
-## 📥 Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Kutkarsh24/EVconnects.git
-   cd EVconnects/evconnect
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Create a `.env` file in the project root and add your environment variables:
-   ```
-   REACT_APP_STRIPE_PUBLIC_KEY=your_stripe_public_key
-   REACT_APP_EMAILJS_SERVICE_ID=your_emailjs_service_id
-   REACT_APP_EMAILJS_TEMPLATE_ID=your_emailjs_template_id
-   REACT_APP_EMAILJS_USER_ID=your_emailjs_user_id
-   ```
-
-4. Start the development server:
-   ```bash
-   npm start
-   ```
-
 ## 🚀 Usage
 
 1. Register an account or login
@@ -70,7 +44,11 @@ EVconnects is a modern web application designed to facilitate electric vehicle c
 
 ## 📱 Screenshots
 
-*(Add screenshots of your application here)*
+![Screenshot 2025-03-30 at 12 55 04 PM](https://github.com/user-attachments/assets/a273aac7-3019-46a6-b721-bef316e33b8e)
+
+![Screenshot 2025-03-30 at 12 55 31 PM](https://github.com/user-attachments/assets/091cdad0-0747-49ab-ac21-43d255eebe42)
+
+
 
 ## 🔒 Environment Variables
 
