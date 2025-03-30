@@ -1,0 +1,6 @@
+*.js linguist-language=JavaScript
+server/*.js linguist-language=Node.js
+src/*.js linguist-language=React
+*.jsx linguist-language=React
+*.css linguist-language=CSS
+*.html linguist-language=HTML

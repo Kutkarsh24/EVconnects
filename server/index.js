@@ -1,61 +1,44 @@
-// Basic Express server for EVconnects API
+// Main Express server for EVconnects API
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-
-// Load environment variables
-dotenv.config();
+const mongoose = require('mongoose');
+const config = require('./config');
+const apiRoutes = require('./routes/api');
 
 // Initialize Express app
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = config.port;
 
 // Create HTTP server and Socket.io instance
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.NODE_ENV === 'production' ? 'https://evconnects.com' : 'http://localhost:3000',
+    origin: config.corsOrigin,
     methods: ['GET', 'POST']
   }
 });
 
+// Connect to MongoDB
+mongoose.connect(config.mongoURI)
+  .then(() => console.log('MongoDB Connected'))
+  .catch(err => {
+    console.error('MongoDB Connection Error:', err);
+    process.exit(1);
+  });
+
 // Middleware
-app.use(cors());
+app.use(cors({ origin: config.corsOrigin }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.get('/api/health', (req, res) => {
+// API Routes
+app.use('/api', apiRoutes);
+
+// Health check endpoint
+app.get('/health', (req, res) => {
   res.status(200).json({ status: 'healthy', message: 'EVconnects API is running!' });
-});
-
-// API routes for charging stations
-app.get('/api/stations', (req, res) => {
-  // This would typically fetch from a database
-  const mockStations = require('../src/mockData');
-  res.json(mockStations);
-});
-
-// API endpoint for creating Stripe payment intents
-app.post('/api/create-payment-intent', async (req, res) => {
-  try {
-    const { amount } = req.body;
-    
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: amount * 100, // Convert to cents
-      currency: 'usd',
-      payment_method_types: ['card'],
-    });
-    
-    res.status(200).json({
-      clientSecret: paymentIntent.client_secret,
-    });
-  } catch (error) {
-    console.error('Error creating payment intent:', error);
-    res.status(500).json({ error: error.message });
-  }
 });
 
 // Socket.io connection events
@@ -71,6 +54,19 @@ io.on('connection', (socket) => {
     socket.leave(`station:${stationId}`);
     console.log(`User ${socket.id} left station ${stationId}`);
   });
+
+  // Handle real-time station status updates
+  socket.on('update-charger-status', (data) => {
+    const { stationId, chargerId, isAvailable } = data;
+    // In a real app, you would update the database here
+    
+    // Broadcast the status change to all users viewing this station
+    io.to(`station:${stationId}`).emit('charger-status-changed', {
+      stationId,
+      chargerId,
+      isAvailable
+    });
+  });
   
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
@@ -79,5 +75,5 @@ io.on('connection', (socket) => {
 
 // Start server
 httpServer.listen(PORT, () => {
-  console.log(`EVconnects server running on port ${PORT}`);
+  console.log(`EVconnects server running in ${config.environment} mode on port ${PORT}`);
 });
